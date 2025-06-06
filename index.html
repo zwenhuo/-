@@ -1,0 +1,2968 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>背包乱斗构筑记录工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e6e6e6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: #ff9a3c;
+            text-shadow: 0 0 10px rgba(255, 154, 60, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .author-info {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #4cc9f0;
+        }
+        
+        .tabs {
+            display: flex;
+            background: rgba(30, 30, 46, 0.7);
+            border-radius: 12px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 18px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+            font-weight: 600;
+            position: relative;
+        }
+        
+        .tab.active {
+            background: linear-gradient(45deg, #4361ee, #4cc9f0);
+        }
+        
+        .tab:not(.active):hover {
+            background: rgba(76, 201, 240, 0.2);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: rgba(30, 30, 46, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-header i {
+            font-size: 1.8rem;
+            margin-right: 15px;
+            color: #4cc9f0;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            color: #4cc9f0;
+        }
+        
+        /* 图片上传区域 */
+        .image-upload {
+            text-align: center;
+            padding: 30px 20px;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .image-upload:hover {
+            border-color: #4cc9f0;
+            background: rgba(76, 201, 240, 0.05);
+        }
+        
+        .image-upload i {
+            font-size: 4rem;
+            color: #4cc9f0;
+            margin-bottom: 15px;
+        }
+        
+        .image-upload h3 {
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .image-upload p {
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(45deg, #4cc9f0, #4361ee);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(76, 201, 240, 0.5);
+        }
+        
+        /* 构筑逻辑区域 */
+        textarea {
+            width: 100%;
+            height: 200px;
+            background: rgba(20, 20, 35, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            color: #e6e6e6;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border: 1px solid #4cc9f0;
+            box-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+        }
+        
+        /* 补充说明区域 */
+        .supplement-container {
+            margin-top: 25px;
+        }
+        
+        .supplement-title {
+            font-size: 1.2rem;
+            color: #f72585;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .supplement-title i {
+            margin-right: 10px;
+        }
+        
+        .supplement-list {
+            margin-bottom: 15px;
+        }
+        
+        .supplement {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(20, 20, 35, 0.7);
+            border-radius: 10px;
+            border-left: 4px solid #f72585;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .point-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: #e6e6e6;
+            font-size: 1rem;
+            padding: 8px 0;
+        }
+        
+        .point-input:focus {
+            outline: none;
+        }
+        
+        .delete-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #aaa;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .delete-btn:hover {
+            background: rgba(247, 37, 133, 0.3);
+            color: white;
+        }
+        
+        .add-btn {
+            background: linear-gradient(45deg, #f72585, #b5179e);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            width: 150px;
+            margin: 10px 0;
+        }
+        
+        .add-btn i {
+            margin-right: 8px;
+        }
+        
+        .add-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(247, 37, 133, 0.4);
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .save-btn {
+            background: linear-gradient(45deg, #2ec4b6, #20bf55);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(46, 196, 182, 0.4);
+        }
+        
+        .reset-btn {
+            background: linear-gradient(45deg, #ff9a3c, #ff6b6b);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .reset-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .back-btn {
+            background: linear-gradient(45deg, #4361ee, #4cc9f0);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(76, 201, 240, 0.4);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .success-message {
+            text-align: center;
+            background: rgba(46, 196, 182, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* 搜索输入框样式 */
+        #searchInput {
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(20, 20, 35, 0.7);
+            color: #e6e6e6;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border: 1px solid #4cc9f0;
+            box-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+        }
+
+        /* 我的构筑区域 */
+        .saved-builds {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .build-card {
+            background: rgba(30, 30, 46, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .build-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .build-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .build-number {
+            font-weight: bold;
+            color: #4361ee;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        
+        .build-title {
+            font-size: 1.3rem;
+            color: #ff9a3c;
+        }
+        
+        .build-date {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .build-image {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            max-height: 200px;
+            object-fit: cover;
+        }
+        
+        .build-logic-preview {
+            color: #ccc;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .build-logic-preview::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(to bottom, transparent, rgba(30, 30, 46, 0.9));
+        }
+
+        /* 构筑操作按钮容器（修改/删除按钮） */
+        .build-actions {
+            display: flex;
+            gap: 0;
+            align-items: center;
+        }
+
+        /* 删除按钮样式 */
+        .delete-build-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff9a3c);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .class-filter {
+            background: rgba(20, 20, 35, 0.7);
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .class-filter span {
+            color: #4cc9f0;
+            font-weight: 600;
+        }
+
+        .class-filter input[type="checkbox"] {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            background: rgba(20, 20, 35, 0.7);
+            cursor: pointer;
+            vertical-align: middle;
+        }
+
+        .class-filter input[type="checkbox"]:checked {
+            border-color: #4cc9f0;
+            background: #4cc9f0;
+        }
+
+        .class-filter label {
+            color: #e6e6e6;
+            cursor: pointer;
+            vertical-align: middle;
+            margin-right: 15px;
+        }
+
+        .delete-build-btn:hover {
+            background: rgba(255, 107, 107, 0.4);
+        }
+        
+        .build-details {
+            margin-top: 15px;
+        }
+        
+        [contenteditable="true"] {
+            border-radius: 8px;
+            border: 1px solid #ffffff;
+            padding: 5px;
+        }
+
+        [contenteditable="true"]:focus {
+            border-color: #4361ee !important;
+            border-width: 1px;
+            border-style: solid;
+            outline: none;
+        }
+
+        .detail-title {
+            color: #4cc9f0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .detail-title i {
+            margin-right: 8px;
+        }
+        
+        .supplement-list, .notes-list {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .supplement-list li, .notes-list li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .empty-message {
+            text-align: center;
+            padding: 50px;
+            color: #777;
+            font-size: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .empty-message i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #4cc9f0;
+        }
+        
+        /* 构筑详情页 */
+        .build-detail-container {
+            background: rgba(30, 30, 46, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .build-detail-image {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            max-height: 500px;
+            object-fit: contain;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .build-detail-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .detail-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .detail-section-title {
+            font-size: 1.4rem;
+            color: #ff9a3c;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .detail-section-title i {
+            margin-right: 10px;
+        }
+        
+        .detail-content {
+            background: rgba(20, 20, 35, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        /* 心得记录页 */
+        .notes-tab-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+        
+        .notes-tab-content.show-form {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .notes-form {
+            background: rgba(30, 30, 46, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+        
+        .notes-tab-content.show-form .notes-form {
+            display: block;
+        }
+        
+        .notes-list-container {
+            background: rgba(30, 30, 46, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: none;
+            overflow-y: visible;
+        }
+        
+        .note-card {
+            background: rgba(20, 20, 35, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2ec4b6;
+        }
+        
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .note-title {
+            font-size: 1.2rem;
+            color: #ff9a3c;
+        }
+        
+        .note-date {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+        
+        .note-content {
+            color: #ccc;
+            line-height: 1.6;
+        }
+        
+        .delete-note-btn {
+            background: rgba(255, 107, 107, 0.2);
+            border: none;
+            color: #ff6b6b;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .delete-note-btn:hover {
+            background: rgba(255, 107, 107, 0.4);
+        }
+        
+        /* 实验项目 */
+        .experiments-container {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .experiments-container h2 {
+            font-size: 1.4rem;
+            color: #ff9a3c;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .experiments-container h2 i {
+            margin-right: 10px;
+        }
+        
+        /* 表单元素 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4cc9f0;
+        }
+        
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(20, 20, 35, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #e6e6e6;
+            font-size: 1rem;
+        }
+        
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4cc9f0;
+            box-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+        }
+        
+        .form-row {
+            margin-bottom: 15px;
+        }
+        
+        /* 删除按钮 */
+        .delete-build-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(255, 107, 107, 0.2);
+            border: none;
+            color: #ff6b6b;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .delete-build-btn:hover {
+            background: rgba(255, 107, 107, 0.4);
+        }
+        
+        /* 添加按钮样式 */
+        .add-notes-btn {
+            background: linear-gradient(45deg, #4cc9f0, #4361ee);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .add-notes-btn i {
+            margin-right: 8px;
+        }
+        
+        .add-notes-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(76, 201, 240, 0.4);
+        }
+        
+        .notes-form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .notes-form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .cancel-btn {
+            background: linear-gradient(45deg, #ff9a3c, #ff6b6b);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .cancel-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .notes-success-message {
+            text-align: center;
+            background: rgba(46, 196, 182, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* 编辑模式样式 */
+        .edit-container {
+            background: rgba(20, 20, 35, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #4cc9f0;
+            margin-top: 20px;
+        }
+        
+        .edit-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .editable {
+            border: 1px solid transparent;
+            padding: 8px;
+            border-radius: 6px;
+            transition: border 0.3s;
+            width: 100%;
+            background: rgba(20, 20, 35, 0.7);
+            color: #e6e6e6;
+            font-size: 1rem;
+        }
+        
+        .editable:focus {
+            border: 1px solid #4cc9f0;
+            outline: none;
+        }
+        
+        /* 状态消息 */
+        .status-message {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            min-width: 300px;
+        }
+        
+        .status-success {
+            background: rgba(46, 196, 182, 0.2);
+            color: #2ec4b6;
+            border: 1px solid #2ec4b6;
+        }
+        
+        .status-error {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+        }
+        
+        /* 图片上传覆盖层 */
+        .upload-overlay {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        /* 已保存构筑数量文本颜色 */
+        #buildCount {
+            color: #666;
+            margin-left: 5px;
+        }
+        
+        /* 淘汰标记 */
+        .deprecated-tag {
+            background: linear-gradient(45deg, #ff6b6b, #ff9a3c);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-left: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .deprecated-tag i {
+            font-size: 0.9rem;
+        }
+        
+        /* 详情页淘汰标记 */
+        .detail-deprecated {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(45deg, #ff6b6b, #ff9a3c);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            margin-left: 15px;
+            font-size: 0.95rem;
+        }
+        
+        /* 美化编辑按钮 */
+        .edit-btn {
+            background: linear-gradient(45deg, #4cc9f0, #4361ee);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .edit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(76, 201, 240, 0.4);
+        }
+        
+        /* 核心思路图片 */
+        .supplement-image {
+            max-width: 200px;
+            max-height: 200px;
+            margin-left: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            border: 2px solid transparent;
+            object-fit: cover;
+        }
+        
+        .supplement-image:hover {
+            transform: scale(1.05);
+            border: 2px solid #4cc9f0;
+        }
+        
+        /* 图片模态框 */
+        .image-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            cursor: pointer;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+        }
+        
+        /* 职业背包样式 */
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        /* 详情页新增字段样式 */
+        .detail-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(30, 30, 46, 0.5);
+            border-radius: 10px;
+            border-left: 3px solid #4cc9f0;
+        }
+        
+        .detail-item-title {
+            font-weight: bold;
+            color: #4cc9f0;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .detail-item-title i {
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .detail-item-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .item-tag {
+            background: rgba(76, 201, 240, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+        
+        /* 表单提示 */
+        .form-hint {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        
+        /* 作者链接 */
+        .author-link {
+            color: #4cc9f0;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .author-link:hover {
+            color: #ff9a3c;
+            text-decoration: underline;
+        }
+        
+        /* 自定义弹窗 */
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+        
+        .modal-box {
+            background: rgba(30, 30, 46, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: #ff9a3c;
+            margin-bottom: 20px;
+        }
+        
+        .modal-message {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .modal-btn {
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .modal-confirm {
+            background: linear-gradient(45deg, #2ec4b6, #20bf55);
+            color: white;
+        }
+        
+        .modal-cancel {
+            background: linear-gradient(45deg, #ff9a3c, #ff6b6b);
+            color: white;
+        }
+        
+        .modal-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 优化输入组 */
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group-title {
+            font-size: 1.1rem;
+            color: #4cc9f0;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-group-title i {
+            margin-right: 10px;
+        }
+        
+        .input-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .input-item {
+            display: flex;
+            align-items: center;
+            background: rgba(20, 20, 35, 0.7);
+            border-radius: 8px;
+            padding: 10px 15px;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .input-item input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #e6e6e6;
+            font-size: 1rem;
+            padding: 5px 0;
+        }
+        
+        .input-item input:focus {
+            outline: none;
+        }
+        
+        .input-item .delete-btn {
+            margin-left: 10px;
+        }
+        
+        .add-input-btn {
+            background: rgba(76, 201, 240, 0.2);
+            color: #4cc9f0;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .add-input-btn:hover {
+            background: rgba(76, 201, 240, 0.4);
+        }
+        
+        /* 编辑模式图片区域 */
+        .edit-image-container {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .edit-image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .edit-image-container:hover .edit-image-overlay {
+            opacity: 1;
+        }
+        
+        .edit-image-text {
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+        }
+        
+        /* 核心思路图片预览 */
+        .core-idea-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 6px;
+            margin-left: 15px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            object-fit: cover;
+        }
+        
+        .core-idea-image:hover {
+            transform: scale(1.05);
+            border: 2px solid #4cc9f0;
+        }
+        
+        /* 名称在截图上方 */
+        .detail-name-container {
+            margin-bottom: 20px;
+        }
+        
+        /* 淘汰状态优化 */
+        .deprecated-toggle {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #555;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background: linear-gradient(45deg, #ff6b6b, #ff9a3c);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+        
+        /* 必填项星号样式 */
+        .required-star {
+            color: #ff6b6b;
+            margin-right: 4px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-backpack"></i> 背包乱斗构筑记录工具</h1>
+            <p class="subtitle">记录游戏构筑，分析策略并心得总结</p>
+            <p class="author-info">作者：<a href="https://space.bilibili.com/3546641764190308?spm_id_from=333.1007.0.0" class="author-link" target="_blank">bilibili：吻火QAQ</a></p>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="create">创建新构筑</div>
+            <div class="tab" data-tab="saved">我的构筑</div>
+            <div class="tab" data-tab="notes">心得记录</div>
+        </div>
+        
+        <!-- 状态消息容器 -->
+        <div class="status-message" id="globalStatus"></div>
+        
+        <!-- 图片模态框 -->
+        <div class="image-modal" id="imageModal">
+            <img class="modal-content" id="modalImage">
+        </div>
+        
+        <!-- 自定义确认弹窗 -->
+        <div class="custom-modal" id="confirmModal">
+            <div class="modal-box">
+                <div class="modal-title" id="modalTitle">确认操作</div>
+                <div class="modal-message" id="modalMessage">确定要执行此操作吗？</div>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-cancel" id="modalCancel">取消</button>
+                    <button class="modal-btn modal-confirm" id="modalConfirm">确定</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 创建新构筑内容 -->
+        <div class="tab-content active" id="create-tab">
+            <div class="main-content">
+                <!-- 左侧：图片上传和预览 -->
+                <div class="card">
+                    <div class="card-header" style="justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <i class="fas fa-camera"></i>
+                            <h2 class="card-title">上传构筑截图 <span class="required-star">*</span></h2>
+                        </div>
+                        <button class="upload-btn" id="importBtn" style="margin: 0; padding: 8px 20px; font-size: 0.9rem;">导入构筑</button>
+                    </div>
+                    <div class="image-upload" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>点击或拖拽上传截图</h3>
+                        <p>支持 JPG, PNG 格式</p>
+                        <button class="upload-btn">选择文件</button>
+                        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                    </div>
+                    <img id="preview" class="preview-image" alt="构筑预览">
+                </div>
+                
+                <!-- 右侧：构筑详情 -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-file-alt"></i>
+                        <h2 class="card-title">构筑详情</h2>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="buildName"><i class="fas fa-tag"></i> <span class="required-star">*</span> 构筑名称</label>
+                        <input type="text" id="buildName" placeholder="取个名字吧~">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="buildClass"><i class="fas fa-user"></i> <span class="required-star">*</span> 职业选择</label>
+                            <select id="buildClass" required style="padding: 12px; width: 100%; border-radius: 8px; background: rgba(20, 20, 35, 0.7); color: #e6e6e6; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                <option value="">请选择职业</option>
+                                <option value="游侠">游侠</option>
+                                <option value="收割者">收割者</option>
+                                <option value="狂战士">狂战士</option>
+                                <option value="火焰魔导师">火焰魔导师</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="buildBag"><i class="fas fa-briefcase"></i> 职业背包</label>
+                            <select id="buildBag" style="padding: 12px; width: 100%; border-radius: 8px; background: rgba(20, 20, 35, 0.7); color: #e6e6e6; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                <option value="">请先选择职业</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-group-title">
+                            <i class="fas fa-chess-queen"></i> 转职
+                        </div>
+                        <div class="input-list" id="jobChangeList">
+                            <div class="input-item">
+                                <input type="text" placeholder="">
+                                <button class="delete-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                        <button class="add-input-btn" id="addJobChangeBtn">
+                            <i class="fas fa-plus"></i> 添加转职
+                        </button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-group-title">
+                            <i class="fas fa-fist-raised"></i> 技能
+                        </div>
+                        <div class="input-list" id="skillsList">
+                            <div class="input-item">
+                                <input type="text" placeholder="">
+                                <button class="delete-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                        <button class="add-input-btn" id="addSkillBtn">
+                            <i class="fas fa-plus"></i> 添加技能
+                        </button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-group-title">
+                            <i class="fas fa-sword"></i> 武器
+                        </div>
+                        <div class="input-list" id="weaponsList">
+                            <div class="input-item">
+                                <input type="text" placeholder="">
+                                <button class="delete-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                        <button class="add-input-btn" id="addWeaponBtn">
+                            <i class="fas fa-plus"></i> 添加武器
+                        </button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-group-title">
+                            <i class="fas fa-box-open"></i> 物品
+                        </div>
+                        <div class="input-list" id="itemsList">
+                            <div class="input-item">
+                                <input type="text" placeholder="">
+                                <button class="delete-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                        <button class="add-input-btn" id="addItemBtn">
+                            <i class="fas fa-plus"></i> 添加物品
+                        </button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="buildLogic"><i class="fas fa-pencil-alt"></i> 其他补充</label>
+                        <textarea id="buildLogic" placeholder="其他补充说明..."></textarea>
+                    </div>
+                    
+                    <div class="supplement-container">
+                        <div class="supplement-title">
+                            <i class="fas fa-lightbulb"></i> 核心思路
+                        </div>
+                        <div class="supplement-list" id="coreIdeaList">
+                            <div class="supplement">
+                                <input type="text" class="point-input" placeholder="核心思路说明">
+                                <input type="file" accept="image/*" class="image-upload-mini" style="display: none;">
+                                <button class="upload-mini-btn"><i class="fas fa-image"></i></button>
+                                <button class="delete-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                        <button class="add-btn" id="addCoreIdeaBtn"><i class="fas fa-plus"></i> 添加说明</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="success-message" id="successMessage">
+                <i class="fas fa-check-circle"></i> 构筑已成功保存！可在"我的构筑"中查看
+            </div>
+            
+            <div class="action-buttons">
+                <button class="save-btn" id="saveBtn"><i class="fas fa-save"></i> 保存构筑</button>
+                <button class="reset-btn" id="resetBtn"><i class="fas fa-redo"></i> 重置表单</button>
+            </div>
+        </div>
+        
+        <!-- 我的构筑内容 -->
+        <div class="tab-content" id="saved-tab">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-archive"></i>
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-grow: 1;">
+                        <h2 class="card-title">已保存的构筑<span id="buildCount">(0)</span></h2>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="add-btn" id="myBuildImportBtn" style="margin: 0; width: auto;"><i class="fas fa-upload"></i> 导入</button>
+                            <button class="add-btn" id="myBuildExportBtn" style="margin: 0; width: auto;"><i class="fas fa-download"></i> 导出</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="text" id="searchInput" placeholder="搜索构筑名称、转职、技能、武器、物品等...">
+                <div class="class-filter" style="margin: 10px 0;">
+                    <span>职业筛选：</span>
+                    <input type="checkbox" class="class-check" value="游侠" id="classRanger"><label for="classRanger" style="margin-right: 10px;">游侠</label>
+                    <input type="checkbox" class="class-check" value="收割者" id="classReaper"><label for="classReaper" style="margin-right: 10px;">收割者</label>
+                    <input type="checkbox" class="class-check" value="狂战士" id="classBerserker"><label for="classBerserker" style="margin-right: 10px;">狂战士</label>
+                    <input type="checkbox" class="class-check" value="火焰魔导师" id="classMage"><label for="classMage" style="margin-right: 10px;">火焰魔导师</label>
+                </div>
+                <div class="saved-builds" id="savedBuilds">
+                    <div class="empty-message" id="emptyMessage">
+                        <i class="fas fa-box-open"></i>
+                        <p>暂无已保存的构筑</p>
+                        <p>创建新构筑后，将在这里显示</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 构筑详情页 -->
+        <div class="tab-content" id="detail-tab">
+            <div class="build-detail-container" id="buildDetailContainer">
+                <!-- 状态消息 -->
+                <div class="status-message" id="detailStatus"></div>
+                
+                <!-- 查看模式 -->
+                <div id="detailViewMode">
+                    <div class="detail-name-container">
+                        <div class="detail-section-title">
+                            <i class="fas fa-tag"></i> 构筑名称
+                            <span id="deprecatedTag" class="detail-deprecated" style="display: none;">
+                                <i class="fas fa-ban"></i> 已淘汰
+                            </span>
+                        </div>
+                        <div class="detail-content" id="detailName"></div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i class="fas fa-camera"></i> 构筑截图
+                        </div>
+                        <img id="detailImage" class="build-detail-image" alt="构筑详情">
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i class="fas fa-info-circle"></i> 构筑信息
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-item">
+                                <div class="detail-item-title">
+                                    <i class="fas fa-user"></i> 职业
+                                </div>
+                                <div id="detailClass"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-item-title">
+                                    <i class="fas fa-briefcase"></i> 职业背包
+                                </div>
+                                <div id="detailBag"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-item-title">
+                                    <i class="fas fa-chess-queen"></i> 转职
+                                </div>
+                                <div class="detail-item-content" id="detailJobChange"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-item-title">
+                                    <i class="fas fa-fist-raised"></i> 技能
+                                </div>
+                                <div class="detail-item-content" id="detailSkills"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-item-title">
+                                    <i class="fas fa-sword"></i> 武器
+                                </div>
+                                <div class="detail-item-content" id="detailWeapons"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-item-title">
+                                    <i class="fas fa-box-open"></i> 物品
+                                </div>
+                                <div class="detail-item-content" id="detailItems"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i class="fas fa-lightbulb"></i> 核心思路
+                        </div>
+                        <div class="detail-content">
+                            <ul class="supplement-list" id="detailCoreIdeas"></ul>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i class="fas fa-pencil-alt"></i> 其他补充
+                        </div>
+                        <div class="detail-content" id="detailLogic"></div>
+                    </div>
+                </div>
+                
+                <!-- 编辑模式 -->
+                <div class="edit-container" id="detailEditMode" style="display: none;">
+                    <div class="form-group">
+                        <label for="editName"><i class="fas fa-tag"></i> 构筑名称</label>
+                        <input type="text" id="editName" class="editable">
+                    </div>
+                    
+                    <div class="edit-image-container">
+                        <label><i class="fas fa-camera"></i> 构筑截图</label>
+                        <img id="editDetailImage" class="build-detail-image" alt="构筑详情">
+                        <div class="edit-image-overlay">
+                            <div class="edit-image-text">
+                                <i class="fas fa-sync-alt"></i> 点击更换图片
+                            </div>
+                        </div>
+                        <input type="file" id="editImageInput" accept="image/*" style="display: none;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editLogic"><i class="fas fa-pencil-alt"></i> 其他补充</label>
+                        <textarea id="editLogic" class="editable" rows="6"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-lightbulb"></i> 核心思路</label>
+                        <div id="editCoreIdeas"></div>
+                        <button class="add-btn" id="addCoreIdeaEdit">
+                            <i class="fas fa-plus"></i> 添加说明
+                        </button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-ban"></i> 淘汰状态</label>
+                        <div class="deprecated-toggle">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="editDeprecated">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <label for="editDeprecated">标记为已淘汰构筑</label>
+                        </div>
+                        <span class="form-hint">已淘汰的构筑会在列表中显示标记</span>
+                    </div>
+                    
+                    <div class="edit-actions">
+                        <button class="save-btn" id="saveEditBtn">
+                            <i class="fas fa-save"></i> 保存修改
+                        </button>
+                        <button class="reset-btn" id="cancelEditBtn">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="back-btn" id="backToListBtn">
+                        <i class="fas fa-arrow-left"></i> 返回列表
+                    </button>
+                    <button class="edit-btn" id="editDetailBtn">
+                        <i class="fas fa-edit"></i> 修改
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 心得记录内容 -->
+        <div class="tab-content" id="notes-tab">
+            <div class="notes-tab-content" id="notesContent">
+                <!-- 添加心得表单区域（默认隐藏） -->
+                <div class="notes-form" id="notesForm">
+                    <div class="notes-form-header">
+                        <div class="card-header">
+                            <i class="fas fa-lightbulb"></i>
+                            <h2 class="card-title">添加心得记录</h2>
+                        </div>
+                        <button class="cancel-btn" id="cancelNoteBtn">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-row">
+                            <label for="noteTitle"><i class="fas fa-edit"></i> 心得标题</label>
+                            <input type="text" id="noteTitle" placeholder="输入心得标题">
+                        </div>
+                        
+                        <div class="form-row">
+                            <label for="noteContent"><i class="fas fa-book"></i> 心得内容</label>
+                            <textarea id="noteContent" placeholder="记录你的游戏心得、对阵不同职业的策略、关键时机等..."></textarea>
+                        </div>
+                        
+                        <div class="notes-success-message" id="notesSuccessMessage">
+                            <i class="fas fa-check-circle"></i> 心得已成功保存！
+                        </div>
+                        
+                        <div class="notes-form-actions">
+                            <button class="save-btn" id="saveNoteBtn" style="width: 200px;">
+                                <i class="fas fa-save"></i> 保存心得
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 实验项目 -->
+                    <div class="experiments-container">
+                        <h2><i class="fas fa-flask"></i> 待实验项目</h2>
+                        <div class="form-group">
+                            <div class="form-row">
+                                <label for="experimentTitle"><i class="fas fa-edit"></i> 项目名称</label>
+                                <input type="text" id="experimentTitle" placeholder="输入实验项目标题">
+                            </div>
+                            
+                            <div class="form-row">
+                                <label for="experimentContent"><i class="fas fa-book"></i> 项目内容</label>
+                                <textarea id="experimentContent" placeholder="记录需要实验的游戏策略、装备组合等..."></textarea>
+                            </div>
+                            
+                            <div class="notes-form-actions">
+                                <button class="save-btn" id="saveExperimentBtn" style="width: 200px;">
+                                    <i class="fas fa-save"></i> 保存项目
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 已保存记录区域 -->
+                <div class="notes-list-container">
+                    <div class="card-header">
+                        <i class="fas fa-book-open"></i>
+                        <h2 class="card-title">已保存的记录</h2>
+                        <button class="add-notes-btn" id="addNotesBtn">
+                            <i class="fas fa-plus"></i> 添加心得
+                        </button>
+                    </div>
+                    
+                    <div id="savedNotes">
+                        <div class="empty-message">
+                            <i class="fas fa-book"></i>
+                            <p>暂无保存的记录</p>
+                            <p>添加记录后，将在这里显示</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>背包乱斗构筑记录工具 v1.5 | 作者：<a href="https://space.bilibili.com/3546641764190308?spm_id_from=333.1007.0.0" class="author-link" target="_blank">bilibili：吻火QAQ</a></p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 存储所有已保存的构筑和心得
+            let savedBuilds = JSON.parse(localStorage.getItem('savedBuilds')) || [];
+            let savedNotes = JSON.parse(localStorage.getItem('savedNotes')) || [];
+            
+            // 生成唯一名称的函数
+            function generateUniqueName(baseName, builds) {
+                const existingNames = builds.map(build => build.name);
+                let newName = baseName;
+                let counter = 1;
+                
+                while (existingNames.includes(newName)) {
+                    const suffix = counter < 10 ? `0${counter}` : counter;
+                    newName = `${baseName}-${suffix}`;
+                    counter++;
+                }
+                
+                return newName;
+            }
+            
+            // 全局状态消息
+            function showGlobalStatus(message, type) {
+                const statusEl = document.getElementById('globalStatus');
+                statusEl.textContent = message;
+                statusEl.className = `status-message status-${type}`;
+                statusEl.style.display = 'block';
+                
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 3000);
+            }
+            
+            // 自定义确认弹窗
+            function showConfirm(message, callback) {
+                const modal = document.getElementById('confirmModal');
+                const messageEl = document.getElementById('modalMessage');
+                messageEl.textContent = message;
+                modal.style.display = 'flex';
+                
+                // 绑定确认事件
+                document.getElementById('modalConfirm').onclick = function() {
+                    modal.style.display = 'none';
+                    callback(true);
+                };
+                
+                // 绑定取消事件
+                document.getElementById('modalCancel').onclick = function() {
+                    modal.style.display = 'none';
+                    callback(false);
+                };
+            }
+            
+            // 初始化搜索功能 - 增强版
+            function filterBuilds() {
+                const searchText = document.getElementById('searchInput').value.toLowerCase();
+                const selectedClasses = Array.from(document.querySelectorAll('.class-check:checked')).map(checkbox => checkbox.value);
+                const savedBuildsContainer = document.getElementById('savedBuilds');
+                savedBuildsContainer.innerHTML = '';
+
+                if (savedBuilds.length === 0) {
+                    savedBuildsContainer.innerHTML = `
+                        <div class="empty-message">
+                            <i class="fas fa-box-open"></i>
+                            <p>暂无已保存的构筑</p>
+                        </div>`;
+                    return;
+                }
+
+                let hasMatch = false;
+                savedBuilds.forEach(build => {
+                    const classMatch = selectedClasses.length === 0 || selectedClasses.includes(build.class);
+                    
+                    // 扩展搜索范围：名称、逻辑、转职、技能、武器、物品
+                    const nameMatch = build.name.toLowerCase().includes(searchText);
+                    const logicMatch = build.logic.toLowerCase().includes(searchText);
+                    const bagMatch = build.bag.toLowerCase().includes(searchText);
+                    const jobChangesMatch = build.jobChanges.some(item => item.toLowerCase().includes(searchText));
+                    const skillsMatch = build.skills.some(item => item.toLowerCase().includes(searchText));
+                    const weaponsMatch = build.weapons.some(item => item.toLowerCase().includes(searchText));
+                    const itemsMatch = build.items.some(item => item.toLowerCase().includes(searchText));
+                    
+                    if (classMatch && (nameMatch || logicMatch || bagMatch || jobChangesMatch || skillsMatch || weaponsMatch || itemsMatch)) {
+                        hasMatch = true;
+                        const buildCard = createBuildCard(build);
+                        savedBuildsContainer.appendChild(buildCard);
+                    }
+                });
+
+                if (!hasMatch) {
+                    savedBuildsContainer.innerHTML = `
+                        <div class="empty-message">
+                            <i class="fas fa-search"></i>
+                            <p>未找到匹配的构筑</p>
+                        </div>`;
+                }
+            }
+
+            // 创建构筑卡片
+            function createBuildCard(build) {
+                const buildCard = document.createElement('div');
+                buildCard.className = 'build-card';
+                buildCard.dataset.id = build.id;
+                
+                // 淘汰标记
+                const deprecatedTag = build.deprecated 
+                    ? `<span class="deprecated-tag"><i class="fas fa-ban"></i> 已淘汰</span>` 
+                    : '';
+                
+                buildCard.innerHTML = `
+                    <div class="build-header">
+                        <div class="build-title">${build.name}${deprecatedTag}</div>
+                        <div class="build-date">${build.date}</div>
+                    </div>
+                    <img src="${build.image}" alt="构筑截图" class="build-image">
+                    <div class="build-logic-preview">
+                        ${build.logic.substring(0, 200)}${build.logic.length > 200 ? '...' : ''}
+                    </div>
+                    <div class="build-actions">
+                        <button class="delete-build-btn" data-id="${build.id}">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </div>
+                `;
+                
+                // 点击卡片查看详情
+                buildCard.addEventListener('click', function(e) {
+                    if (!e.target.classList.contains('delete-build-btn')) {
+                        showBuildDetail(build.id);
+                    }
+                });
+                
+                // 添加删除功能
+                buildCard.querySelector('.delete-build-btn').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const buildId = this.getAttribute('data-id');
+                    showConfirm('确定要删除这个构筑吗？', function(confirmed) {
+                        if (confirmed) {
+                            deleteBuild(buildId);
+                        }
+                    });
+                });
+
+                return buildCard;
+            }
+            
+            // 删除构筑
+            function deleteBuild(buildId) {
+                const index = savedBuilds.findIndex(b => b.id == buildId);
+                if (index !== -1) {
+                    savedBuilds.splice(index, 1);
+                    localStorage.setItem('savedBuilds', JSON.stringify(savedBuilds));
+                    displaySavedBuilds();
+                    showGlobalStatus('构筑已删除', 'success');
+                }
+            }
+            
+            // 初始化搜索输入监听
+            document.getElementById('searchInput').addEventListener('input', filterBuilds);
+            
+            // 初始化显示
+            displaySavedBuilds();
+            displaySavedNotes();
+            
+            // 职业背包动态更新
+            document.getElementById('buildClass').addEventListener('change', function() {
+                const bagSelect = document.getElementById('buildBag');
+                bagSelect.innerHTML = '<option value="">请选择职业背包</option>';
+                
+                switch(this.value) {
+                    case '游侠':
+                        bagSelect.innerHTML += `
+                            <option value="露营背包">露营背包</option>
+                            <option value="藤条编织篮">藤条编织篮</option>
+                        `;
+                        break;
+                    case '收割者':
+                        bagSelect.innerHTML += `
+                            <option value="储物棺材">储物棺材</option>
+                            <option value="遗物箱">遗物箱</option>
+                        `;
+                        break;
+                    case '火焰魔导师':
+                        bagSelect.innerHTML += `
+                            <option value="火坑">火坑</option>
+                            <option value="献祭之碗">献祭之碗</option>
+                        `;
+                        break;
+                    case '狂战士':
+                        bagSelect.innerHTML += `
+                            <option value="旅行包">旅行包</option>
+                            <option value="工具带">工具带</option>
+                        `;
+                        break;
+                }
+            });
+            
+            // 导入功能（创建新构筑页）
+            document.getElementById('importBtn').addEventListener('click', function() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.txt';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            document.getElementById('buildLogic').value = event.target.result;
+                        };
+                        reader.readAsText(file);
+                    }
+                };
+                input.click();
+            });
+
+            // 我的构筑页导出功能
+            document.getElementById('myBuildExportBtn').addEventListener('click', function() {
+                const buildsData = JSON.stringify(savedBuilds, null, 2);
+                const blob = new Blob([buildsData], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = '背包乱斗构筑导出记录.txt';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+
+            // 我的构筑页导入功能
+            document.getElementById('myBuildImportBtn').addEventListener('click', function() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.txt';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            try {
+                                let importedBuilds = JSON.parse(event.target.result);
+                                // 处理导入的构筑名称
+                                if (Array.isArray(importedBuilds)) {
+                                    importedBuilds.forEach(build => {
+                                        build.name = generateUniqueName(build.name, savedBuilds);
+                                    });
+                                } else {
+                                    importedBuilds.name = generateUniqueName(importedBuilds.name, savedBuilds);
+                                    importedBuilds = [importedBuilds];
+                                }
+                                
+                                savedBuilds = [...savedBuilds, ...importedBuilds];
+                                localStorage.setItem('savedBuilds', JSON.stringify(savedBuilds));
+                                displaySavedBuilds();
+                                showGlobalStatus('构筑导入成功！', 'success');
+                            } catch (error) {
+                                showGlobalStatus('文件格式错误，无法导入', 'error');
+                            }
+                        };
+                        reader.readAsText(file);
+                    }
+                };
+                input.click();
+            });
+
+            // 文件上传处理
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const preview = document.getElementById('preview');
+            
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#4cc9f0';
+                uploadArea.style.backgroundColor = 'rgba(76, 201, 240, 0.1)';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                uploadArea.style.backgroundColor = '';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                uploadArea.style.backgroundColor = '';
+                
+                if (e.dataTransfer.files.length) {
+                    handleFile(e.dataTransfer.files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length) {
+                    handleFile(fileInput.files[0]);
+                }
+            });
+            
+            function handleFile(file) {
+                if (file.type.match('image.*')) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        uploadArea.style.display = 'none';
+                        
+                        // 自动填充构筑名称（如果为空）
+                        if (!document.getElementById('buildName').value) {
+                            const fileName = file.name.replace(/\.[^/.]+$/, ""); // 移除扩展名
+                            document.getElementById('buildName').value = fileName;
+                        }
+                    };
+                    
+                    reader.readAsDataURL(file);
+                } else {
+                    showGlobalStatus('请上传图片文件！', 'error');
+                }
+            }
+            
+            // 标签切换功能
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // 移除所有标签的active类
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // 添加当前标签的active类
+                    tab.classList.add('active');
+                    
+                    // 隐藏所有内容
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    // 显示对应内容
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                    
+                    // 如果是"我的构筑"标签，刷新列表
+                    if (tabId === 'saved') {
+                        displaySavedBuilds();
+                    }
+                    // 如果是"心得记录"标签，刷新列表
+                    if (tabId === 'notes') {
+                        displaySavedNotes();
+                        // 确保进入心得页面时隐藏表单
+                        document.getElementById('notesContent').classList.remove('show-form');
+                        document.getElementById('notesForm').style.display = 'none';
+                    }
+                });
+            });
+            
+            // 添加转职
+            document.getElementById('addJobChangeBtn').addEventListener('click', function() {
+                const list = document.getElementById('jobChangeList');
+                const newItem = document.createElement('div');
+                newItem.className = 'input-item';
+                newItem.innerHTML = `
+                    <input type="text" placeholder="">
+                    <button class="delete-btn"><i class="fas fa-times"></i></button>
+                `;
+                list.appendChild(newItem);
+                
+                newItem.querySelector('.delete-btn').addEventListener('click', function() {
+                    this.parentElement.remove();
+                });
+            });
+            
+            // 添加技能
+            document.getElementById('addSkillBtn').addEventListener('click', function() {
+                const list = document.getElementById('skillsList');
+                const newItem = document.createElement('div');
+                newItem.className = 'input-item';
+                newItem.innerHTML = `
+                    <input type="text" placeholder="">
+                    <button class="delete-btn"><i class="fas fa-times"></i></button>
+                `;
+                list.appendChild(newItem);
+                
+                newItem.querySelector('.delete-btn').addEventListener('click', function() {
+                    this.parentElement.remove();
+                });
+            });
+            
+            // 添加武器
+            document.getElementById('addWeaponBtn').addEventListener('click', function() {
+                const list = document.getElementById('weaponsList');
+                const newItem = document.createElement('div');
+                newItem.className = 'input-item';
+                newItem.innerHTML = `
+                    <input type="text" placeholder="">
+                    <button class="delete-btn"><i class="fas fa-times"></i></button>
+                `;
+                list.appendChild(newItem);
+                
+                newItem.querySelector('.delete-btn').addEventListener('click', function() {
+                    this.parentElement.remove();
+                });
+            });
+            
+            // 添加物品
+            document.getElementById('addItemBtn').addEventListener('click', function() {
+                const list = document.getElementById('itemsList');
+                const newItem = document.createElement('div');
+                newItem.className = 'input-item';
+                newItem.innerHTML = `
+                    <input type="text" placeholder="">
+                    <button class="delete-btn"><i class="fas fa-times"></i></button>
+                `;
+                list.appendChild(newItem);
+                
+                newItem.querySelector('.delete-btn').addEventListener('click', function() {
+                    this.parentElement.remove();
+                });
+            });
+            
+            // 添加核心思路
+            document.getElementById('addCoreIdeaBtn').addEventListener('click', function() {
+                const list = document.getElementById('coreIdeaList');
+                const newItem = document.createElement('div');
+                newItem.className = 'supplement';
+                newItem.innerHTML = `
+                    <input type="text" class="point-input" placeholder="核心思路说明">
+                    <input type="file" accept="image/*" class="image-upload-mini" style="display: none;">
+                    <button class="upload-mini-btn"><i class="fas fa-image"></i></button>
+                    <button class="delete-btn"><i class="fas fa-times"></i></button>
+                `;
+                list.appendChild(newItem);
+                
+                // 绑定图片上传事件
+                const uploadBtn = newItem.querySelector('.upload-mini-btn');
+                const fileInput = newItem.querySelector('.image-upload-mini');
+                
+                uploadBtn.addEventListener('click', () => {
+                    fileInput.click();
+                });
+                
+                fileInput.addEventListener('change', function(e) {
+                    if (this.files.length) {
+                        const file = this.files[0];
+                        if (file.type.match('image.*')) {
+                            const reader = new FileReader();
+                            reader.onload = function(event) {
+                                // 创建图片预览
+                                let imgPreview = uploadBtn.nextElementSibling;
+                                if (!imgPreview || !imgPreview.classList.contains('supplement-image')) {
+                                    imgPreview = document.createElement('img');
+                                    imgPreview.className = 'supplement-image';
+                                    uploadBtn.parentNode.insertBefore(imgPreview, uploadBtn.nextSibling);
+                                }
+                                imgPreview.src = event.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    }
+                });
+                
+                newItem.querySelector('.delete-btn').addEventListener('click', function() {
+                    this.parentElement.remove();
+                });
+            });
+            
+            // 重置按钮
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                showConfirm('确定要重置表单吗？所有输入的内容将会丢失。', function(confirmed) {
+                    if (confirmed) {
+                        document.getElementById('buildName').value = '';
+                        document.getElementById('buildClass').value = '';
+                        document.getElementById('buildBag').innerHTML = '<option value="">请先选择职业</option>';
+                        document.getElementById('buildLogic').value = '';
+                        
+                        // 重置转职、技能、武器、物品
+                        document.getElementById('jobChangeList').innerHTML = `
+                            <div class="input-item">
+                                <input type="text" placeholder="">
+                                <button class="delete-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                        `;
+                        
+                        document.getElementById('skillsList').innerHTML = `
+                            <div class="input-item">
+                                <input type="text" placeholder="">
+                                <button class="delete-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                        `;
+                        
+                        document.getElementById('weaponsList').innerHTML = `
+                            <div class="input-item">
+                                <input type="text" placeholder="">
+                                <button class="delete-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                        `;
+                        
+                        document.getElementById('itemsList').innerHTML = `
+                            <div class="input-item">
+                                <input type="text" placeholder="">
+                                <button class="delete-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                        `;
+                        
+                        // 重置核心思路
+                        document.getElementById('coreIdeaList').innerHTML = `
+                            <div class="supplement">
+                                <input type="text" class="point-input" placeholder="核心思路说明">
+                                <input type="file" accept="image/*" class="image-upload-mini" style="display: none;">
+                                <button class="upload-mini-btn"><i class="fas fa-image"></i></button>
+                                <button class="delete-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                        `;
+                        
+                        // 重置图片预览
+                        preview.style.display = 'none';
+                        uploadArea.style.display = 'block';
+                        
+                        // 重置成功消息
+                        document.getElementById('successMessage').style.display = 'none';
+                        
+                        // 重新绑定事件
+                        document.querySelectorAll('.delete-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                this.parentElement.remove();
+                            });
+                        });
+                        
+                        showGlobalStatus('表单已重置', 'success');
+                    }
+                });
+            });
+            
+            // 保存按钮
+            document.getElementById('saveBtn').addEventListener('click', () => {
+                const buildNameInput = document.getElementById('buildName').value;
+                const buildClass = document.getElementById('buildClass').value;
+                const buildBag = document.getElementById('buildBag').value;
+                const buildLogic = document.getElementById('buildLogic').value;
+                const imageSrc = preview.style.display === 'block' ? preview.src : '';
+                
+                // 收集转职、技能、武器、物品
+                const jobChanges = Array.from(document.querySelectorAll('#jobChangeList .input-item input')).map(input => input.value).filter(v => v.trim() !== '');
+                const skills = Array.from(document.querySelectorAll('#skillsList .input-item input')).map(input => input.value).filter(v => v.trim() !== '');
+                const weapons = Array.from(document.querySelectorAll('#weaponsList .input-item input')).map(input => input.value).filter(v => v.trim() !== '');
+                const items = Array.from(document.querySelectorAll('#itemsList .input-item input')).map(input => input.value).filter(v => v.trim() !== '');
+                
+                // 收集核心思路（带图片）
+                const coreIdeas = [];
+                document.querySelectorAll('#coreIdeaList .supplement').forEach(supp => {
+                    const text = supp.querySelector('.point-input').value;
+                    const img = supp.querySelector('.supplement-image');
+                    if (text.trim() !== '' || (img && img.src)) {
+                        coreIdeas.push({
+                            text: text,
+                            image: img ? img.src : ''
+                        });
+                    }
+                });
+                
+                // 验证必填项
+                if (!buildNameInput) {
+                    showGlobalStatus('请填写构筑名称！', 'error');
+                    return;
+                }
+                
+                if (!buildClass) {
+                    showGlobalStatus('请选择职业！', 'error');
+                    return;
+                }
+                
+                if (!imageSrc) {
+                    showGlobalStatus('请上传构筑截图！', 'error');
+                    return;
+                }
+                
+                // 生成唯一名称
+                const buildName = generateUniqueName(buildNameInput, savedBuilds);
+                
+                // 创建新构筑对象
+                const newBuild = {
+                    id: Date.now(),
+                    name: buildName,
+                    date: new Date().toLocaleDateString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    }),
+                    image: imageSrc,
+                    class: buildClass,
+                    bag: buildBag,
+                    jobChanges: jobChanges,
+                    skills: skills,
+                    weapons: weapons,
+                    items: items,
+                    coreIdeas: coreIdeas,
+                    logic: buildLogic,
+                    deprecated: false
+                };
+                
+                // 添加到保存列表
+                savedBuilds.push(newBuild);
+                
+                // 保存到本地存储
+                localStorage.setItem('savedBuilds', JSON.stringify(savedBuilds));
+                
+                // 显示成功消息
+                document.getElementById('successMessage').style.display = 'block';
+                showGlobalStatus('构筑已成功保存！', 'success');
+                
+                // 滚动到顶部
+                window.scrollTo(0, 0);
+                
+                // 重置表单（可选）
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 3000);
+            });
+            
+            // 显示已保存的构筑
+            function displaySavedBuilds() {
+                // 按日期降序排列
+                savedBuilds.sort((a, b) => b.id - a.id);
+                
+                const countSpan = document.getElementById('buildCount');
+                countSpan.textContent = `(${savedBuilds.length})`;
+                
+                const savedBuildsContainer = document.getElementById('savedBuilds');
+                
+                if (savedBuilds.length === 0) {
+                    savedBuildsContainer.innerHTML = `
+                        <div class="empty-message">
+                            <i class="fas fa-box-open"></i>
+                            <p>暂无已保存的构筑</p>
+                            <p>创建新构筑后，将在这里显示</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                savedBuildsContainer.innerHTML = '';
+                
+                savedBuilds.forEach(build => {
+                    const buildCard = createBuildCard(build);
+                    savedBuildsContainer.appendChild(buildCard);
+                });
+                
+                // 初始化职业筛选事件监听
+                document.querySelectorAll('.class-check').forEach(checkbox => {
+                    checkbox.addEventListener('change', filterBuilds);
+                });
+            }
+            
+            // 显示构筑详情
+            function showBuildDetail(buildId) {
+                const build = savedBuilds.find(b => b.id == buildId);
+                
+                if (!build) return;
+                
+                // 隐藏所有标签页
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // 显示详情页
+                document.getElementById('detail-tab').classList.add('active');
+                
+                // 填充详情数据
+                document.getElementById('detailImage').src = build.image;
+                document.getElementById('detailName').textContent = build.name;
+                document.getElementById('detailClass').textContent = build.class;
+                document.getElementById('detailBag').textContent = build.bag;
+                document.getElementById('detailLogic').textContent = build.logic;
+                
+                // 显示淘汰标记
+                document.getElementById('deprecatedTag').style.display = build.deprecated ? 'inline-flex' : 'none';
+                
+                // 填充转职
+                const jobChangeContainer = document.getElementById('detailJobChange');
+                jobChangeContainer.innerHTML = '';
+                build.jobChanges.forEach(item => {
+                    const tag = document.createElement('div');
+                    tag.className = 'item-tag';
+                    tag.textContent = item;
+                    jobChangeContainer.appendChild(tag);
+                });
+                
+                // 填充技能
+                const skillsContainer = document.getElementById('detailSkills');
+                skillsContainer.innerHTML = '';
+                build.skills.forEach(item => {
+                    const tag = document.createElement('div');
+                    tag.className = 'item-tag';
+                    tag.textContent = item;
+                    skillsContainer.appendChild(tag);
+                });
+                
+                // 填充武器
+                const weaponsContainer = document.getElementById('detailWeapons');
+                weaponsContainer.innerHTML = '';
+                build.weapons.forEach(item => {
+                    const tag = document.createElement('div');
+                    tag.className = 'item-tag';
+                    tag.textContent = item;
+                    weaponsContainer.appendChild(tag);
+                });
+                
+                // 填充物品
+                const itemsContainer = document.getElementById('detailItems');
+                itemsContainer.innerHTML = '';
+                build.items.forEach(item => {
+                    const tag = document.createElement('div');
+                    tag.className = 'item-tag';
+                    tag.textContent = item;
+                    itemsContainer.appendChild(tag);
+                });
+                
+                // 填充核心思路
+                const coreIdeasList = document.getElementById('detailCoreIdeas');
+                coreIdeasList.innerHTML = '';
+                build.coreIdeas.forEach((idea, idx) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `${idx + 1}. ${idea.text}`;
+                    
+                    if (idea.image) {
+                        const img = document.createElement('img');
+                        img.src = idea.image;
+                        img.className = 'core-idea-image';
+                        img.onclick = () => showImageModal(idea.image);
+                        li.appendChild(img);
+                    }
+                    
+                    coreIdeasList.appendChild(li);
+                });
+                
+                // 确保查看模式显示，编辑模式隐藏
+                document.getElementById('detailViewMode').style.display = 'block';
+                document.getElementById('detailEditMode').style.display = 'none';
+                document.getElementById('detailStatus').style.display = 'none';
+                
+                // 设置编辑按钮
+                document.getElementById('editDetailBtn').onclick = () => {
+                    showEditMode(build);
+                };
+                
+                // 绑定图片点击事件
+                document.getElementById('detailImage').onclick = () => {
+                    showImageModal(build.image);
+                };
+            }
+            
+            // 显示图片模态框
+            function showImageModal(src) {
+                const modal = document.getElementById('imageModal');
+                const modalImg = document.getElementById('modalImage');
+                modalImg.src = src;
+                modal.style.display = 'flex';
+                
+                // 点击任意位置关闭模态框
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            }
+            
+            // 显示编辑模式
+            function showEditMode(originalBuild) {
+                // 隐藏查看模式，显示编辑模式
+                document.getElementById('detailViewMode').style.display = 'none';
+                document.getElementById('detailEditMode').style.display = 'block';
+                
+                // 填充编辑表单
+                document.getElementById('editName').value = originalBuild.name;
+                document.getElementById('editLogic').value = originalBuild.logic;
+                document.getElementById('editDeprecated').checked = originalBuild.deprecated;
+                
+                // 填充图片
+                document.getElementById('editDetailImage').src = originalBuild.image;
+                
+                // 绑定图片更换事件
+                document.getElementById('editImageInput').onchange = function(e) {
+                    if (this.files.length) {
+                        const file = this.files[0];
+                        if (file.type.match('image.*')) {
+                            const reader = new FileReader();
+                            reader.onload = function(event) {
+                                document.getElementById('editDetailImage').src = event.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    }
+                };
+                
+                // 点击图片更换
+                document.getElementById('editDetailImage').onclick = function() {
+                    document.getElementById('editImageInput').click();
+                };
+                
+                // 填充核心思路（可编辑）
+                const editCoreIdeas = document.getElementById('editCoreIdeas');
+                editCoreIdeas.innerHTML = '';
+                originalBuild.coreIdeas.forEach((idea, index) => {
+                    const suppDiv = createEditableCoreIdea(index, idea.text, idea.image);
+                    editCoreIdeas.appendChild(suppDiv);
+                });
+                
+                // 添加新核心思路
+                document.getElementById('addCoreIdeaEdit').onclick = () => {
+                    const newSupp = createEditableCoreIdea(editCoreIdeas.children.length, '', '');
+                    editCoreIdeas.appendChild(newSupp);
+                };
+                
+                // 保存编辑
+                document.getElementById('saveEditBtn').onclick = () => saveBuildEdit(originalBuild);
+                
+                // 取消编辑
+                document.getElementById('cancelEditBtn').onclick = () => {
+                    document.getElementById('detailEditMode').style.display = 'none';
+                    document.getElementById('detailViewMode').style.display = 'block';
+                };
+            }
+            
+            // 创建可编辑的核心思路项
+            function createEditableCoreIdea(index, text, image) {
+                const div = document.createElement('div');
+                div.className = 'supplement';
+                div.innerHTML = `
+                    <input type="text" class="point-input" value="${text}" placeholder="核心思路说明">
+                    <input type="file" accept="image/*" class="image-upload-mini" style="display: none;">
+                    <button class="upload-mini-btn"><i class="fas fa-image"></i></button>
+                    ${image ? `<img src="${image}" class="core-idea-image" onclick="showImageModal('${image}')">` : ''}
+                    <button class="delete-btn"><i class="fas fa-times"></i></button>
+                `;
+                
+                // 图片上传功能
+                const uploadBtn = div.querySelector('.upload-mini-btn');
+                const fileInput = div.querySelector('.image-upload-mini');
+                
+                uploadBtn.addEventListener('click', () => {
+                    fileInput.click();
+                });
+                
+                fileInput.addEventListener('change', function(e) {
+                    if (this.files.length) {
+                        const file = this.files[0];
+                        if (file.type.match('image.*')) {
+                            const reader = new FileReader();
+                            reader.onload = function(event) {
+                                // 创建或更新图片预览
+                                let imgPreview = uploadBtn.nextElementSibling;
+                                if (!imgPreview || !imgPreview.classList.contains('core-idea-image')) {
+                                    imgPreview = document.createElement('img');
+                                    imgPreview.className = 'core-idea-image';
+                                    imgPreview.onclick = (e) => {
+                                        e.stopPropagation();
+                                        showImageModal(event.target.result);
+                                    };
+                                    uploadBtn.parentNode.insertBefore(imgPreview, uploadBtn.nextSibling);
+                                }
+                                imgPreview.src = event.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    }
+                });
+                
+                // 添加删除功能
+                div.querySelector('.delete-btn').addEventListener('click', function() {
+                    div.remove();
+                });
+                
+                return div;
+            }
+            
+            // 保存编辑
+            function saveBuildEdit(originalBuild) {
+                const name = document.getElementById('editName').value;
+                const logic = document.getElementById('editLogic').value;
+                const deprecated = document.getElementById('editDeprecated').checked;
+                const newImage = document.getElementById('editDetailImage').src;
+                
+                // 收集核心思路
+                const coreIdeas = [];
+                document.querySelectorAll('#editCoreIdeas .supplement').forEach(supp => {
+                    const text = supp.querySelector('.point-input').value;
+                    const img = supp.querySelector('.core-idea-image');
+                    if (text.trim() !== '' || (img && img.src)) {
+                        coreIdeas.push({
+                            text: text,
+                            image: img ? img.src : ''
+                        });
+                    }
+                });
+                
+                // 验证输入
+                if (!name) {
+                    showGlobalStatus('请填写名称', 'error');
+                    return;
+                }
+                
+                // 更新构建
+                const updatedBuild = {
+                    ...originalBuild,
+                    name,
+                    logic,
+                    coreIdeas,
+                    deprecated,
+                    image: newImage,
+                    date: new Date().toLocaleDateString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    })
+                };
+                
+                // 更新存储
+                const index = savedBuilds.findIndex(b => b.id === originalBuild.id);
+                savedBuilds[index] = updatedBuild;
+                localStorage.setItem('savedBuilds', JSON.stringify(savedBuilds));
+                
+                // 显示成功消息
+                showGlobalStatus('修改已保存！', 'success');
+                
+                // 滚动到顶部
+                window.scrollTo(0, 0);
+                
+                // 刷新显示
+                setTimeout(() => {
+                    document.getElementById('detailEditMode').style.display = 'none';
+                    document.getElementById('detailViewMode').style.display = 'block';
+                    showBuildDetail(originalBuild.id); // 重新加载详情
+                }, 500);
+            }
+            
+            // 返回列表按钮
+            document.getElementById('backToListBtn').addEventListener('click', function() {
+                // 隐藏详情页
+                document.getElementById('detail-tab').classList.remove('active');
+                // 显示我的构筑页
+                document.getElementById('saved-tab').classList.add('active');
+                // 激活我的构筑标签
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                    if (tab.dataset.tab === 'saved') {
+                        tab.classList.add('active');
+                    }
+                });
+            });
+            
+            // 保存心得按钮
+            document.getElementById('saveNoteBtn').addEventListener('click', () => {
+                const noteTitle = document.getElementById('noteTitle').value;
+                const noteContent = document.getElementById('noteContent').value;
+                
+                if (!noteTitle || !noteContent) {
+                    showGlobalStatus('请填写心得标题和内容！', 'error');
+                    return;
+                }
+                
+                // 创建新心得对象
+                const newNote = {
+                    id: Date.now(),
+                    title: noteTitle,
+                    date: new Date().toLocaleDateString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    }),
+                    content: noteContent,
+                    type: 'note'
+                };
+                
+                // 添加到保存列表
+                savedNotes.push(newNote);
+                
+                // 保存到本地存储
+                localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
+                
+                // 重置表单
+                document.getElementById('noteTitle').value = '';
+                document.getElementById('noteContent').value = '';
+                
+                // 显示成功消息
+                document.getElementById('notesSuccessMessage').style.display = 'block';
+                showGlobalStatus('心得已成功保存！', 'success');
+                
+                // 刷新显示
+                displaySavedNotes();
+                
+                // 2秒后隐藏表单区域
+                setTimeout(() => {
+                    document.getElementById('notesContent').classList.remove('show-form');
+                    document.getElementById('notesForm').style.display = 'none';
+                    document.getElementById('notesSuccessMessage').style.display = 'none';
+                }, 2000);
+            });
+            
+            // 保存实验项目按钮
+            document.getElementById('saveExperimentBtn').addEventListener('click', () => {
+                const experimentTitle = document.getElementById('experimentTitle').value;
+                const experimentContent = document.getElementById('experimentContent').value;
+                
+                if (!experimentTitle || !experimentContent) {
+                    showGlobalStatus('请填写实验项目标题和内容！', 'error');
+                    return;
+                }
+                
+                // 创建新实验项目对象
+                const newExperiment = {
+                    id: Date.now(),
+                    title: experimentTitle,
+                    date: new Date().toLocaleDateString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    }),
+                    content: experimentContent,
+                    type: 'experiment'
+                };
+                
+                // 添加到保存列表
+                savedNotes.push(newExperiment);
+                
+                // 保存到本地存储
+                localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
+                
+                // 重置表单
+                document.getElementById('experimentTitle').value = '';
+                document.getElementById('experimentContent').value = '';
+                
+                // 显示成功消息
+                document.getElementById('notesSuccessMessage').style.display = 'block';
+                showGlobalStatus('实验项目已保存！', 'success');
+                
+                // 刷新显示
+                displaySavedNotes();
+                
+                // 2秒后隐藏表单区域
+                setTimeout(() => {
+                    document.getElementById('notesContent').classList.remove('show-form');
+                    document.getElementById('notesForm').style.display = 'none';
+                    document.getElementById('notesSuccessMessage').style.display = 'none';
+                }, 2000);
+            });
+            
+            // 显示已保存的记录（心得和实验项目）
+            function displaySavedNotes() {
+                // 按日期降序排序心得记录
+                savedNotes.sort((a, b) => b.id - a.id);
+                
+                const savedNotesContainer = document.getElementById('savedNotes');
+                
+                if (savedNotes.length === 0) {
+                    savedNotesContainer.innerHTML = `
+                        <div class="empty-message">
+                            <i class="fas fa-book"></i>
+                            <p>暂无保存的记录</p>
+                            <p>添加记录后，将在这里显示</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                savedNotesContainer.innerHTML = '';
+                
+                // 分离心得和实验项目
+                const notes = savedNotes.filter(item => item.type === 'note');
+                const experiments = savedNotes.filter(item => item.type === 'experiment');
+                
+                // 显示心得
+                if (notes.length > 0) {
+                    const notesHeader = document.createElement('h3');
+                    notesHeader.style.color = '#4cc9f0';
+                    notesHeader.style.marginBottom = '15px';
+                    notesHeader.innerHTML = '<i class="fas fa-lightbulb"></i> 已保存的心得';
+                    savedNotesContainer.appendChild(notesHeader);
+                    
+                    notes.forEach((note, index) => {
+                        const noteCard = createNoteCard(note, index);
+                        savedNotesContainer.appendChild(noteCard);
+                    });
+                }
+                
+                // 显示实验项目
+                if (experiments.length > 0) {
+                    const experimentsHeader = document.createElement('h3');
+                    experimentsHeader.style.color = '#ff9a3c';
+                    experimentsHeader.style.marginTop = '30px';
+                    experimentsHeader.style.marginBottom = '15px';
+                    experimentsHeader.innerHTML = '<i class="fas fa-flask"></i> 待实验项目';
+                    savedNotesContainer.appendChild(experimentsHeader);
+                    
+                    experiments.forEach((experiment, index) => {
+                        const experimentCard = createNoteCard(experiment, index);
+                        savedNotesContainer.appendChild(experimentCard);
+                    });
+                }
+            }
+            
+            // 创建记录卡片
+            function createNoteCard(item, index) {
+                const noteCard = document.createElement('div');
+                noteCard.className = 'note-card';
+                noteCard.innerHTML = `
+                    <div class="note-header">
+                        <div class="note-title">${item.title}</div>
+                        <div class="note-date">${item.date}</div>
+                    </div>
+                    <div class="note-content">${item.content}</div>
+                    <div style="text-align: right; margin-top: 15px;">
+                        <button class="delete-note-btn" data-id="${item.id}">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </div>
+                `;
+                
+                // 为实验项目添加特殊样式
+                if (item.type === 'experiment') {
+                    noteCard.style.borderLeft = '4px solid #ff9a3c';
+                }
+                
+                // 添加删除功能
+                noteCard.querySelector('.delete-note-btn').addEventListener('click', function() {
+                    const noteId = this.getAttribute('data-id');
+                    showConfirm('确定要删除这条记录吗？', function(confirmed) {
+                        if (confirmed) {
+                            const index = savedNotes.findIndex(n => n.id == noteId);
+                            if (index !== -1) {
+                                savedNotes.splice(index, 1);
+                                localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
+                                displaySavedNotes();
+                                showGlobalStatus('记录已删除', 'success');
+                            }
+                        }
+                    });
+                });
+                
+                return noteCard;
+            }
+            
+            // 添加心得按钮功能
+            document.getElementById('addNotesBtn').addEventListener('click', function() {
+                // 显示表单区域
+                document.getElementById('notesContent').classList.add('show-form');
+                document.getElementById('notesForm').style.display = 'block';
+                
+                // 重置表单
+                document.getElementById('noteTitle').value = '';
+                document.getElementById('noteContent').value = '';
+                document.getElementById('experimentTitle').value = '';
+                document.getElementById('experimentContent').value = '';
+                document.getElementById('notesSuccessMessage').style.display = 'none';
+            });
+            
+            // 取消按钮功能
+            document.getElementById('cancelNoteBtn').addEventListener('click', function() {
+                // 隐藏表单区域
+                document.getElementById('notesContent').classList.remove('show-form');
+                document.getElementById('notesForm').style.display = 'none';
+            });
+            
+            // 初始化核心思路图片上传按钮
+            document.querySelectorAll('.upload-mini-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const fileInput = this.previousElementSibling;
+                    fileInput.click();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
